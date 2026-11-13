@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#09090b" />
+  <title>AURAA CREATIONS & EVENTS | Madurai</title>
+  <link rel="manifest" href="./manifest.json" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body{background:#09090b;color:#f4f4f5;font-family:system-ui,sans-serif}.no-scrollbar::-webkit-scrollbar{display:none}summary{list-style:none}</style>
+</head>
+<body class="min-h-screen pb-24">
+
+  <header class="sticky top-0 z-40 bg-[#09090b]/95 backdrop-blur border-b border-zinc-800 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center text-black font-extrabold text-sm">AC</div>
+      <div>
+        <h1 class="text-xs font-extrabold tracking-wider text-amber-400">AURAA CREATIONS</h1>
+        <p class="text-[10px] text-zinc-400">& EVENTS • MADURAI</p>
+      </div>
+    </div>
+    <details id="adminMenu" class="relative">
+      <summary class="px-3.5 py-1.5 rounded-full bg-zinc-900 border border-amber-500/50 text-xs font-bold text-amber-400 cursor-pointer">🔒 Admin</summary>
+      <div class="fixed inset-x-4 top-16 z-50 rounded-3xl bg-[#121216] border border-zinc-700 p-5 shadow-2xl space-y-3">
+        <div class="flex items-center justify-between">
+          <div><span class="text-[10px] font-bold uppercase text-amber-400">Owner & Manager Access</span><h3 class="text-base font-extrabold text-white">Studio Login</h3></div>
+          <button type="button" onclick="document.getElementById('adminMenu').removeAttribute('open')" class="w-8 h-8 rounded-full bg-zinc-900 text-zinc-400">✕</button>
+        </div>
+        <form onsubmit="doLogin(event)" class="space-y-3">
+          <input id="uIn" required placeholder="Username (e.g. aishwarya)" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-sm text-white" />
+          <input id="pIn" type="password" required placeholder="Password" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-sm text-white" />
+          <button type="submit" class="w-full py-3 rounded-xl bg-amber-400 text-black font-extrabold text-sm">Login & Open Dashboard</button>
+        </form>
+      </div>
+    </details>
+  </header>
+
+  <main id="clientView" class="px-4 pt-4 space-y-6">
+    <section class="rounded-3xl bg-gradient-to-br from-zinc-900 via-[#121216] to-zinc-950 border border-zinc-800 p-5 shadow-xl">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] mb-3">📍 Southgate, Madurai - 625001</div>
+      <h2 class="text-2xl font-extrabold text-white">AURAA CREATIONS <span class="text-amber-400">& EVENTS</span></h2>
+      <p class="text-xs text-zinc-400 mt-2">Capturing timeless weddings, baby showers, puberty ceremonies, bespoke Aari artistry, return gifts & grand events across Madurai.</p>
+      <div class="grid grid-cols-3 gap-2.5 mt-5">
+        <a href="tel:+917449288649" class="flex flex-col items-center py-3 rounded-2xl bg-zinc-900 border border-zinc-800 gap-1"><span class="text-base">📞</span><span class="text-[11px] font-semibold">Call Now</span></a>
+        <a href="https://wa.me/917449288649?text=Hi%20Auraa%20Creations%20%26%20Events%2C%20I%20want%20package%20details." target="_blank" class="flex flex-col items-center py-3 rounded-2xl bg-emerald-950/40 border border-emerald-800/50 gap-1"><span class="text-base">💬</span><span class="text-[11px] font-semibold text-emerald-300">WhatsApp</span></a>
+        <a href="https://www.instagram.com/auraa_creation_by_aishu?xtok=MWZtM3JydTB1dDA2OQ==" target="_blank" class="flex flex-col items-center py-3 rounded-2xl bg-pink-950/30 border border-pink-800/40 gap-1"><span class="text-base">📸</span><span class="text-[11px] font-semibold text-pink-300">Instagram</span></a>
+      </div>
+    </section>
+
+    <section>
+      <div class="flex items-center justify-between mb-3"><h3 class="text-xs font-extrabold uppercase text-zinc-300">Services & Packages</h3><span class="text-[11px] text-amber-400">Custom quotes available</span></div>
+      <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1" id="categoryTabs">
+        <button type="button" onclick="filterPkgs('all')" data-cat="all" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-400 text-black whitespace-nowrap">All</button>
+        <button type="button" onclick="filterPkgs('wedding')" data-cat="wedding" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800 whitespace-nowrap">Wedding</button>
+        <button type="button" onclick="filterPkgs('ceremony')" data-cat="ceremony" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800 whitespace-nowrap">Baby Shower & Puberty</button>
+        <button type="button" onclick="filterPkgs('gifts')" data-cat="gifts" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800 whitespace-nowrap">Return Gifts</button>
+        <button type="button" onclick="filterPkgs('events')" data-cat="events" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800 whitespace-nowrap">Aari, DJ & Chenda Melam</button>
+      </div>
+      <div id="packagesList" class="space-y-3.5 mt-4"></div>
+    </section>
+
+    <section id="bookingSection" class="rounded-3xl bg-[#121216] border border-zinc-800 p-5 space-y-4">
+      <div><span class="text-[10px] font-bold uppercase tracking-widest text-amber-400">Instant Enquiry & Quote</span><h3 class="text-lg font-extrabold text-white">Book Event / Enquire Details</h3></div>
+      <form onsubmit="sendEnquiry(event)" class="space-y-3">
+        <input id="cName" required placeholder="Your Name *" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white" />
+        <input id="cPhone" required type="tel" placeholder="WhatsApp Number *" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white" />
+        <div class="grid grid-cols-2 gap-2.5">
+          <input id="cDate" required type="date" class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-white" />
+          <input id="cVenue" placeholder="Venue / Madurai" class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-white" />
+        </div>
+        <select id="custPackage" onchange="updatePreview()" class="w-full px-3.5 py-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-white">
+          <option value="wed-45">Silver Wedding — ₹45,000 (Trad Photo+Video, 12x36 Album, Pre-Wed, Frame)</option>
+          <option value="wed-65">Gold Wedding — ₹65,000 (Trad+Candid Photo, Video, 12x36 Album, 2 Frames)</option>
+          <option value="wed-80">Platinum Royal Wedding — ₹80,000 (Full Trad+Candid, 2 Albums, Makeup, 30x40 Frame)</option>
+          <option value="baby-25">Baby Shower — ₹25,000 (Traditional Photo + 10x30 Album)</option>
+          <option value="baby-35">Baby Shower Combo — ₹35,000 (Traditional Photo + Video + 10x30 Album)</option>
+          <option value="pub-15">Birthday / Puberty — ₹15,000 to ₹20,000 (Photo + 24x8 Album)</option>
+          <option value="gifts">Return Gifts Only — Jute Bag / Manja Bag</option>
+          <option value="addons">Aari Work / DJ / Chenda Melam Only</option>
+        </select>
+        <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/40 space-y-1.5">
+          <div class="flex justify-between items-center"><span class="text-[10px] font-bold uppercase text-amber-400">Selected Package Inclusions</span><span id="prevPrice" class="px-2 py-0.5 rounded bg-amber-400 text-black text-[11px] font-extrabold">₹45,000</span></div>
+          <p id="prevTitle" class="text-xs font-extrabold text-white">Silver Wedding Package</p>
+          <ul id="prevList" class="space-y-1 text-[11px] text-zinc-200"></ul>
+        </div>
+        <div class="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-2 text-xs">
+          <p class="font-bold text-amber-400">🛍️ Return Gifts (Tick if needed)</p>
+          <div class="grid grid-cols-2 gap-2"><label class="flex items-center gap-2"><input type="checkbox" id="chkJute" onchange="updatePreview()" /> Jute Bag</label><label class="flex items-center gap-2"><input type="checkbox" id="chkManja" onchange="updatePreview()" /> Manja Bag</label></div>
+          <div id="giftBox" class="hidden"><input id="gQty" placeholder="Quantity & Printing details (e.g. 200 Jute Bags)" class="w-full px-3 py-2 rounded-xl bg-[#121216] border border-zinc-700 text-xs text-white" /></div>
+        </div>
+        <div class="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-2 text-xs">
+          <p class="font-bold text-amber-400">✨ Additional Services</p>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2"><input type="checkbox" name="ext" value="Aari Work" /> Aari Work</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="ext" value="DJ Sound" /> DJ Sound</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="ext" value="Chenda Melam" /> Chenda Melam</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="ext" value="Stage Decor" /> Stage Decor</label>
+          </div>
+        </div>
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-300 to-amber-500 text-black font-extrabold text-sm">Send Enquiry & Get WhatsApp Details</button>
+      </form>
+    </section>
+  </main>
+
+  <main id="adminView" class="hidden px-4 pt-4 space-y-4">
+    <div class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 flex justify-between items-center">
+      <div><span id="admRole" class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">OWNER</span><h2 id="admName" class="text-base font-extrabold text-white mt-1">Aishwarya</h2></div>
+      <button onclick="doLogout()" class="px-3 py-1.5 rounded-xl bg-red-950 text-red-300 text-xs font-bold">Logout</button>
+    </div>
+    <div id="ownerBox" class="p-4 rounded-2xl bg-[#121216] border border-zinc-800 space-y-3">
+      <h3 class="text-sm font-extrabold text-amber-400">+ Add Manager / Change Passwords</h3>
+      <form onsubmit="addMgr(event)" class="space-y-2">
+        <input id="mName" required placeholder="Manager Name" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs" />
+        <input id="mUser" required placeholder="Manager Username" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs" />
+        <input id="mPass" required placeholder="Set Manager Password" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs" />
+        <button class="w-full py-2.5 rounded-xl bg-amber-400 text-black font-bold text-xs">Create Manager Account</button>
+      </form>
+      <div id="accList" class="space-y-2 pt-2"></div>
+    </div>
+    <div class="space-y-2"><h3 class="text-xs font-bold uppercase text-zinc-400">Client Enquiries</h3><div id="enqList" class="space-y-2"></div></div>
+  </main>
+
+  <nav id="bottomNav" class="fixed bottom-0 inset-x-0 z-30 bg-[#09090b]/95 border-t border-zinc-800 px-6 py-2.5 flex justify-around">
+    <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="flex flex-col items-center text-amber-400"><span class="text-base">✨</span><span class="text-[10px] font-bold">Studio</span></button>
+    <button onclick="document.getElementById('categoryTabs').scrollIntoView({behavior:'smooth'})" class="flex flex-col items-center text-zinc-400"><span class="text-base">📦</span><span class="text-[10px] font-semibold">Packages</span></button>
+    <button onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})" class="flex flex-col items-center text-zinc-400"><span class="text-base">📅</span><span class="text-[10px] font-semibold">Enquire</span></button>
+  </nav>
+
+  <script src="./app.js"></script>
+</body>
+    </html>
