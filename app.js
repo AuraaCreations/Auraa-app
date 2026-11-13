@@ -1,4 +1,6 @@
 const MAIL = "auraa.creations2407@gmail.com";
+const DB_URL = "https://script.google.com/macros/s/AKfycbzoiCnNwz8uy25rz28dfbvlI_hevEYwimB-fN9hxDo-w_-kcfs70Nb5csfmWS_6Vp5B/exec";
+
 const PKGS = {
   "wed-45": { cat: "wedding", tag: "WEDDING • SILVER", title: "Silver Wedding Package", price: "₹45,000", num: 45000, f: ["Traditional Photo & Video", "1 Big Album (12x36) + Pre-Wedding", "Complimentary Pendrive & 12x18 Frame"] },
   "wed-65": { cat: "wedding", tag: "WEDDING • GOLD", title: "Gold Wedding Package", price: "₹65,000", num: 65000, f: ["Traditional Photo & Video + Candid Photo", "1 Big Album (12x36) + Pre-Wedding", "Complimentary Pendrive & 2 Frames (12x18)"] },
@@ -9,12 +11,42 @@ const PKGS = {
   "gifts": { cat: "gifts", tag: "RETURN GIFTS", title: "Jute Bag & Manja Bag Return Gifts", price: "Bulk Quote", num: 0, f: ["Custom Jute Bags — Sizes & Couple Name Printing", "Traditional Manja Bags — Weddings & Ceremonies"] },
   "addons": { cat: "events", tag: "AARI, DJ & CHENDA MELAM", title: "Aari Work, DJ & Chenda Melam", price: "Custom Quote", num: 0, f: ["Bridal Aari Work Blouse Designing", "DJ & Club Sound, Chenda Melam, Stage Decor & Drone"] }
 };
+
 const DEF_ADM = [{ id: "1", name: "Aishwarya", user: "aishwarya", pass: "auraa2407", role: "owner" }];
-const getAcc = () => JSON.parse(localStorage.getItem("ac_acc") || JSON.stringify(DEF_ADM));
-const saveAcc = a => localStorage.setItem("ac_acc", JSON.stringify(a));
-const getEnq = () => JSON.parse(localStorage.getItem("ac_enq") || "[]");
-const saveEnq = e => localStorage.setItem("ac_enq", JSON.stringify(e));
+let DB = {
+  accounts: JSON.parse(localStorage.getItem("ac_acc") || JSON.stringify(DEF_ADM)),
+  enquiries: JSON.parse(localStorage.getItem("ac_enq") || "[]")
+};
 let curAdm = null;
+
+async function syncFromCloud() {
+  try {
+    const res = await fetch(DB_URL);
+    const data = await res.json();
+    if (data.accounts && data.accounts.length) {
+      DB.accounts = data.accounts;
+      localStorage.setItem("ac_acc", JSON.stringify(DB.accounts));
+    }
+    if (data.enquiries) {
+      DB.enquiries = data.enquiries;
+      localStorage.setItem("ac_enq", JSON.stringify(DB.enquiries));
+    }
+    if (curAdm) renderAdm();
+  } catch (e) {}
+}
+
+async function pushToCloud() {
+  localStorage.setItem("ac_acc", JSON.stringify(DB.accounts));
+  localStorage.setItem("ac_enq", JSON.stringify(DB.enquiries));
+  try {
+    await fetch(DB_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(DB)
+    });
+  } catch (e) {}
+}
 
 function renderPkgs(cat = "all") {
   const keys = ["wed-45", "wed-65", "wed-80", "baby-25", "pub-15", "gifts", "addons"];
@@ -53,8 +85,9 @@ function pickPkg(k) {
   document.getElementById("bookingSection").scrollIntoView({ behavior: "smooth" });
 }
 
-function sendEnquiry(e) {
+async function sendEnquiry(e) {
   e.preventDefault();
+  await syncFromCloud();
   const p = PKGS[document.getElementById("custPackage").value] || PKGS["wed-45"];
   const gifts = [document.getElementById("chkJute").checked ? "Jute Bag" : "", document.getElementById("chkManja").checked ? "Manja Bag" : ""].filter(Boolean).join(" & ") || "None";
   const ext = Array.from(document.querySelectorAll('input[name="ext"]:checked')).map(c => c.value).join(", ") || "None";
@@ -71,15 +104,20 @@ function sendEnquiry(e) {
     total: p.num || 0,
     advance: 0
   };
-  const all = getEnq(); all.unshift(q); saveEnq(all);
+  DB.enquiries.unshift(q);
+  await pushToCloud();
   fetch(`https://formsubmit.co/ajax/${MAIL}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ _subject: `📩 Enquiry: ${q.name}`, ...q }) }).catch(() => {});
   window.open(`https://wa.me/917449288649?text=${encodeURIComponent(`Hello Auraa Creations & Events!\nName: ${q.name}\nPhone: ${q.phone}\nDate: ${q.date}\nVenue: ${q.venue}\nPackage: ${q.pkg}\nReturn Gifts: ${q.gifts}\nAdd-ons: ${q.ext}`)}`, "_blank");
   e.target.reset(); updatePreview();
 }
 
-function doLogin(e) {
+async function doLogin(e) {
   e.preventDefault();
-  const f = getAcc().find(x => x.user === document.getElementById("uIn").value.trim().toLowerCase() && x.pass === document.getElementById("pIn").value);
+  const btn = e.target.querySelector("button");
+  btn.textContent = "Checking Cloud...";
+  await syncFromCloud();
+  btn.textContent = "Login & Open Dashboard";
+  const f = DB.accounts.find(x => x.user.toLowerCase() === document.getElementById("uIn").value.trim().toLowerCase() && x.pass === document.getElementById("pIn").value);
   if (!f) return alert("Wrong Username or Password!");
   curAdm = f;
   document.getElementById("adminMenu").removeAttribute("open");
@@ -97,24 +135,30 @@ function doLogout() {
   document.getElementById("bottomNav").classList.remove("hidden");
 }
 
-function updStatus(idx, val) {
-  const all = getEnq(); all[idx].status = val; saveEnq(all); renderAdm();
+async function updStatus(idx, val) {
+  DB.enquiries[idx].status = val;
+  renderAdm();
+  await pushToCloud();
 }
 
-function updPay(idx, field, val) {
+async function updPay(idx, field, val) {
   if (curAdm.role === "admin") return;
-  const all = getEnq(); all[idx][field] = Number(val) || 0; saveEnq(all); renderAdm();
+  DB.enquiries[idx][field] = Number(val) || 0;
+  renderAdm();
+  await pushToCloud();
 }
 
-function delEnq(idx) {
+async function delEnq(idx) {
   if (curAdm.role !== "owner") return;
   if (!confirm("Delete this client enquiry?")) return;
-  const all = getEnq(); all.splice(idx, 1); saveEnq(all); renderAdm();
+  DB.enquiries.splice(idx, 1);
+  renderAdm();
+  await pushToCloud();
 }
 
 function replyClient(idx) {
-  const q = getEnq()[idx];
-  const ph = q.phone.replace(/\D/g, "");
+  const q = DB.enquiries[idx];
+  const ph = String(q.phone).replace(/\D/g, "");
   const wa = ph.length === 10 ? "91" + ph : ph;
   const bal = (Number(q.total) || 0) - (Number(q.advance) || 0);
   const txt = `Vanakkam ${q.name}! Greetings from *Auraa Creations & Events, Madurai*.\n• Event Date: ${q.date}\n• Package: ${q.pkg}\n• Status: ${q.status || "New Enquiry"}\n• Total: ₹${q.total || 0} | Advance: ₹${q.advance || 0} | Balance: ₹${bal}`;
@@ -137,7 +181,7 @@ function renderAdm() {
     document.getElementById("mPass").insertAdjacentElement("afterend", sel);
   }
 
-  document.getElementById("accList").innerHTML = getAcc().map(a => `
+  document.getElementById("accList").innerHTML = DB.accounts.map(a => `
     <div class="p-3 rounded-xl bg-zinc-900 flex justify-between items-center text-xs">
       <div><b>${a.name}</b> <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px] uppercase">${a.role}</span><br><span class="text-zinc-400">ID: ${a.user} • Pass: ${a.pass}</span></div>
       <div class="flex gap-1.5">
@@ -146,9 +190,11 @@ function renderAdm() {
       </div>
     </div>`).join("");
 
-  const enqs = getEnq();
+  const enqs = DB.enquiries;
   const totSum = enqs.reduce((s, q) => s + (Number(q.total) || 0), 0);
   const advSum = enqs.reduce((s, q) => s + (Number(q.advance) || 0), 0);
+
+  const syncBar = `<div class="flex justify-between items-center mb-2"><span class="text-[11px] text-emerald-400">☁️ Synced with 5TB Google Drive</span><button type="button" onclick="syncFromCloud()" class="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-700 text-[11px] text-amber-400 font-bold">🔄 Refresh</button></div>`;
 
   const summaryHtml = !isAdmStaff && enqs.length ? `
     <div class="grid grid-cols-3 gap-2 p-3 rounded-2xl bg-zinc-900 border border-amber-500/30 text-center text-xs mb-3">
@@ -157,7 +203,7 @@ function renderAdm() {
       <div><span class="text-[10px] text-zinc-400 block">BALANCE</span><b class="text-amber-400">₹${totSum - advSum}</b></div>
     </div>` : "";
 
-  document.getElementById("enqList").innerHTML = summaryHtml + (enqs.length ? enqs.map((q, i) => {
+  document.getElementById("enqList").innerHTML = syncBar + summaryHtml + (enqs.length ? enqs.map((q, i) => {
     const st = q.status || "New Enquiry";
     const tot = Number(q.total) || 0;
     const adv = Number(q.advance) || 0;
@@ -206,14 +252,26 @@ function renderAdm() {
   }).join("") : `<p class="text-xs text-zinc-500">No enquiries yet.</p>`);
 }
 
-function addMgr(e) {
+async function addMgr(e) {
   e.preventDefault();
   const roleSel = document.getElementById("mRole") ? document.getElementById("mRole").value : "manager";
-  const a = getAcc();
-  a.push({ id: Date.now() + "", name: document.getElementById("mName").value, user: document.getElementById("mUser").value.trim().toLowerCase(), pass: document.getElementById("mPass").value, role: roleSel });
-  saveAcc(a); e.target.reset(); renderAdm();
+  DB.accounts.push({ id: Date.now() + "", name: document.getElementById("mName").value, user: document.getElementById("mUser").value.trim().toLowerCase(), pass: document.getElementById("mPass").value, role: roleSel });
+  e.target.reset(); renderAdm();
+  await pushToCloud();
 }
-function chgPass(id) { const np = prompt("Enter New Password:"); if (np) { saveAcc(getAcc().map(a => a.id === id ? { ...a, pass: np } : a)); renderAdm(); } }
-function delAcc(id) { saveAcc(getAcc().filter(a => a.id !== id)); renderAdm(); }
 
-renderPkgs("all"); updatePreview();
+async function chgPass(id) {
+  const np = prompt("Enter New Password:");
+  if (!np) return;
+  DB.accounts = DB.accounts.map(a => a.id === id ? { ...a, pass: np } : a);
+  renderAdm();
+  await pushToCloud();
+}
+
+async function delAcc(id) {
+  DB.accounts = DB.accounts.filter(a => a.id !== id);
+  renderAdm();
+  await pushToCloud();
+}
+
+renderPkgs("all"); updatePreview(); syncFromCloud();
