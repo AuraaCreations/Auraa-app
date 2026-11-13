@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AURAA CREATIONS & EVENTS</title>
+  <link rel="manifest" href="./manifest.json" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body{background:#09090b;color:#f4f4f5;font-family:system-ui,sans-serif}summary{list-style:none}</style>
+</head>
+<body class="p-4 pb-20 max-w-md mx-auto space-y-5">
+  <header class="flex justify-between items-center border-b border-zinc-800 pb-3">
+    <div><h1 class="text-sm font-extrabold text-amber-400">AURAA CREATIONS & EVENTS</h1><p class="text-[11px] text-zinc-400">Southgate, Madurai • +91 74492 88649</p></div>
+    <details id="admBox" class="relative">
+      <summary class="px-3 py-1.5 rounded-full bg-zinc-900 border border-amber-500/50 text-xs font-bold text-amber-400 cursor-pointer">🔒 Admin</summary>
+      <div class="fixed inset-x-4 top-16 z-50 rounded-2xl bg-zinc-900 border border-zinc-700 p-4 shadow-2xl space-y-2.5">
+        <div class="flex justify-between items-center"><b class="text-sm text-amber-400">Owner / Manager Login</b><button type="button" onclick="document.getElementById('admBox').removeAttribute('open')" class="text-zinc-400 px-2">✕</button></div>
+        <form onsubmit="login(event)" class="space-y-2">
+          <input id="u" required placeholder="Username (aishwarya)" class="w-full p-2.5 rounded-xl bg-black border border-zinc-700 text-sm" />
+          <input id="p" type="password" required placeholder="Password" class="w-full p-2.5 rounded-xl bg-black border border-zinc-700 text-sm" />
+          <button class="w-full py-2.5 rounded-xl bg-amber-400 text-black font-bold text-sm">Login</button>
+        </form>
+      </div>
+    </details>
+  </header>
+
+  <main id="cli" class="space-y-5">
+    <div class="grid grid-cols-3 gap-2 text-center text-xs font-bold">
+      <a href="tel:+917449288649" class="py-3 rounded-xl bg-zinc-900 border border-zinc-800">📞 Call</a>
+      <a href="https://wa.me/917449288649" target="_blank" class="py-3 rounded-xl bg-emerald-950/50 border border-emerald-800 text-emerald-300">💬 WhatsApp</a>
+      <a href="https://www.instagram.com/auraa_creation_by_aishu?xtok=MWZtM3JydTB1dDA2OQ==" target="_blank" class="py-3 rounded-xl bg-pink-950/40 border border-pink-800 text-pink-300">📸 Instagram</a>
+    </div>
+
+    <section class="space-y-2 text-xs">
+      <h2 class="font-bold text-amber-400 uppercase">Packages & Details</h2>
+      <div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800"><b>Silver Wedding — ₹45,000:</b> Trad Photo+Video, 12x36 Album, Pre-Wedding, Pendrive + 12x18 Frame</div>
+      <div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800"><b>Gold Wedding — ₹65,000:</b> Trad Photo+Video + Candid Photo, 12x36 Album, Pre-Wedding, Pendrive + 2 Frames</div>
+      <div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800"><b>Platinum Wedding — ₹80,000:</b> Trad+Candid Photo & Video, 2 Albums (12x36 + 18x12), Pre-Wedding, Bridal Makeup, Pendrive + 30x40 Frame</div>
+      <div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800"><b>Baby Shower — ₹25,000 (Video +₹10k):</b> Trad Photo + 10x30 Album (Photo+Video Combo ₹35,000)</div>
+      <div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800"><b>Birthday / Puberty — ₹15k–₹20k (Video +₹10k):</b> Trad Photo + 24x8 Album</div>
+    </section>
+
+    <form onsubmit="book(event)" class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-2.5 text-xs">
+      <h3 class="text-sm font-extrabold text-amber-400">Book Event / Enquire</h3>
+      <input id="cn" required placeholder="Your Name *" class="w-full p-2.5 rounded-xl bg-black border border-zinc-700" />
+      <input id="cp" required type="tel" placeholder="WhatsApp Number *" class="w-full p-2.5 rounded-xl bg-black border border-zinc-700" />
+      <input id="cd" required type="date" class="w-full p-2.5 rounded-xl bg-black border border-zinc-700" />
+      <select id="cpkg" class="w-full p-2.5 rounded-xl bg-black border border-zinc-700">
+        <option>Silver Wedding — ₹45,000 (Trad Photo+Video, 12x36 Album, Pre-Wed, Frame)</option>
+        <option>Gold Wedding — ₹65,000 (Trad+Candid Photo, Video, 12x36 Album, 2 Frames)</option>
+        <option>Platinum Wedding — ₹80,000 (Full Trad+Candid, 2 Albums, Makeup, 30x40 Frame)</option>
+        <option>Baby Shower — ₹25,000 (Photo + 10x30 Album)</option>
+        <option>Baby Shower Combo — ₹35,000 (Photo + Video + 10x30 Album)</option>
+        <option>Birthday / Puberty — ₹15,000 - ₹20,000 (Photo + 24x8 Album)</option>
+        <option>Birthday / Puberty + Video — +₹10,000</option>
+        <option>Return Gifts Only (Jute Bag / Manja Bag)</option>
+        <option>Aari Work / DJ / Chenda Melam Only</option>
+      </select>
+      <div class="p-2.5 rounded-xl bg-black border border-zinc-800 space-y-1.5">
+        <b class="text-amber-400">🛍️ Return Gifts:</b>
+        <div class="flex gap-4"><label><input type="checkbox" id="gj" /> Jute Bag</label><label><input type="checkbox" id="gm" /> Manja Bag</label></div>
+        <input id="gq" placeholder="Quantity & Printing details" class="w-full p-2 rounded-lg bg-zinc-900 border border-zinc-700" />
+      </div>
+      <div class="p-2.5 rounded-xl bg-black border border-zinc-800 space-y-1.5">
+        <b class="text-amber-400">✨ Additional Services:</b>
+        <div class="grid grid-cols-2 gap-1.5">
+          <label><input type="checkbox" name="ex" value="Aari Work" /> Aari Work</label>
+          <label><input type="checkbox" name="ex" value="DJ Sound" /> DJ Sound</label>
+          <label><input type="checkbox" name="ex" value="Chenda Melam" /> Chenda Melam</label>
+          <label><input type="checkbox" name="ex" value="Stage Decor" /> Stage Decor</label>
+        </div>
+      </div>
+      <button class="w-full py-3 rounded-xl bg-amber-400 text-black font-extrabold text-sm">Send Enquiry on WhatsApp</button>
+    </form>
+  </main>
+
+  <main id="adm" class="hidden space-y-4 text-xs">
+    <div class="p-3 rounded-xl bg-zinc-900 flex justify-between items-center">
+      <div><b id="aName" class="text-sm text-amber-400"></b> <span id="aRole" class="uppercase bg-amber-500/20 px-1.5 py-0.5 rounded text-[10px]"></span></div>
+      <button onclick="logout()" class="px-3 py-1 rounded bg-red-900 text-white font-bold">Logout</button>
+    </div>
+    <div id="ownSec" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
+      <b class="text-amber-400">+ Add Manager / Change Passwords</b>
+      <form onsubmit="addMgr(event)" class="space-y-2">
+        <input id="mn" required placeholder="Manager Name" class="w-full p-2 rounded bg-black border border-zinc-700" />
+        <input id="mu" required placeholder="Manager Username" class="w-full p-2 rounded bg-black border border-zinc-700" />
+        <input id="mp" required placeholder="Set Manager Password" class="w-full p-2 rounded bg-black border border-zinc-700" />
+        <button class="w-full py-2 rounded bg-amber-400 text-black font-bold">Create Manager</button>
+      </form>
+      <div id="accBox" class="space-y-1.5 pt-2"></div>
+    </div>
+    <div id="enqBox" class="space-y-2"></div>
+  </main>
+
+  <script>
+    const M="auraa.creations2407@gmail.com",DEF=[{id:"1",name:"Aishwarya",user:"aishwarya",pass:"auraa2407",role:"owner"}];
+    const gA=()=>JSON.parse(localStorage.getItem("ac_a")||JSON.stringify(DEF)),sA=a=>localStorage.setItem("ac_a",JSON.stringify(a));
+    let cur=null;
+    function login(e){e.preventDefault();const f=gA().find(x=>x.user===document.getElementById("u").value.trim().toLowerCase()&&x.pass===document.getElementById("p").value);if(!f)return alert("Wrong Login");cur=f;document.getElementById("admBox").removeAttribute("open");document.getElementById("cli").classList.add("hidden");document.getElementById("adm").classList.remove("hidden");fetch(`https://formsubmit.co/ajax/${M}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({_subject:`Login: ${f.name}`,Role:f.role,Time:new Date().toLocaleString()})}).catch(()=>{});render();}
+    function logout(){cur=null;document.getElementById("adm").classList.add("hidden");document.getElementById("cli").classList.remove("hidden");}
+    function render(){document.getElementById("aName").textContent=cur.name;document.getElementById("aRole").textContent=cur.role;const ow=cur.role==="owner";document.getElementById("ownSec").classList.toggle("hidden",!ow);document.getElementById("accBox").innerHTML=gA().map(a=>`<div class="p-2 rounded bg-black flex justify-between items-center"><div><b>${a.name}</b> (${a.user} / ${a.pass})</div><div class="flex gap-1"><button onclick="cp('${a.id}')" class="px-2 py-1 bg-amber-400 text-black rounded font-bold">Pass</button>${a.role!=="owner"?`<button onclick="da('${a.id}')" class="px-2 py-1 bg-red-900 rounded">X</button>`:""}</div></div>`).join("");document.getElementById("enqBox").innerHTML=(JSON.parse(localStorage.getItem("ac_e")||"[]")).map(q=>`<div class="p-2.5 rounded bg-zinc-900 border border-zinc-800"><b>${q.n}</b> (${q.p}) - ${q.d}<br>${q.pk}<br><span class="text-amber-400">Gifts: ${q.g} | Add-ons: ${q.ex}</span></div>`).join("");}
+    function addMgr(e){e.preventDefault();const a=gA();a.push({id:Date.now()+"",name:document.getElementById("mn").value,user:document.getElementById("mu").value.trim().toLowerCase(),pass:document.getElementById("mp").value,role:"manager"});sA(a);e.target.reset();render();}
+    function cp(id){const np=prompt("New Password:");if(np){sA(gA().map(a=>a.id===id?{...a,pass:np}:a));render();}}
+    function da(id){sA(gA().filter(a=>a.id!==id));render();}
+    function book(e){e.preventDefault();const g=[document.getElementById("gj").checked?"Jute Bag":"",document.getElementById("gm").checked?"Manja Bag":""].filter(Boolean).join("&")||"None";const ex=Array.from(document.querySelectorAll('input[name="ex"]:checked')).map(c=>c.value).join(", ")||"None";const q={n:document.getElementById("cn").value,p:document.getElementById("cp").value,d:document.getElementById("cd").value,pk:document.getElementById("cpkg").value,g:`${g} ${document.getElementById("gq").value}`,ex};const all=JSON.parse(localStorage.getItem("ac_e")||"[]");all.unshift(q);localStorage.setItem("ac_e",JSON.stringify(all));fetch(`https://formsubmit.co/ajax/${M}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({_subject:`Enquiry: ${q.n}`,...q})}).catch(()=>{});window.open(`https://wa.me/917449288649?text=${encodeURIComponent(`Hello Auraa Creations!\nName: ${q.n}\nPhone: ${q.p}\nDate: ${q.d}\nPackage: ${q.pk}\nGifts: ${q.g}\nAdd-ons: ${q.ex}`)}`,"_blank");e.target.reset();}
+  </script>
+</body>
+  </html>
