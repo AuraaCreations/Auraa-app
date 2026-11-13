@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#09090b" />
+  <title>AURAA CREATIONS & EVENTS | Madurai</title>
+  <link rel="manifest" href="./manifest.json" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: { colors: { gold: { 400: '#f3d06b', 500: '#d4af37', 600: '#b59024' }, obsidian: '#09090b', card: '#121216' } } } };
+  </script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body { background: #09090b; color: #f4f4f5; font-family: system-ui, -apple-system, sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="min-h-screen pb-24">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-obsidian/95 backdrop-blur border-b border-zinc-800 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-black font-extrabold text-sm">AC</div>
+      <div>
+        <h1 class="text-xs font-extrabold tracking-wider text-gold-400">AURAA CREATIONS</h1>
+        <p class="text-[10px] text-zinc-400">& EVENTS • MADURAI</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-1.5 bg-zinc-900 p-1 rounded-full border border-zinc-800">
+      <button type="button" id="btnClientView" class="px-3 py-1.5 rounded-full text-xs font-bold bg-gold-500 text-black">Client</button>
+      <button type="button" id="btnAdminView" class
