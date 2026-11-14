@@ -1,5 +1,6 @@
 const MAIL = "auraa.creations2407@gmail.com";
 const DB_URL = "https://script.google.com/macros/s/AKfycbzoiCnNwz8uy25rz28dfbvlI_hevEYwimB-fN9hxDo-w_-kcfs70Nb5csfmWS_6Vp5B/exec";
+const STAGES = ["Order Confirmed", "Shoot / Work Started", "Editing & Designing", "Printing / Finishing", "Ready for Delivery"];
 
 const PKGS = {
   "wed-45": { cat: "wedding", tag: "WEDDING • SILVER", title: "Silver Wedding Package", price: "₹45,000", num: 45000, f: ["Traditional Photo & Video", "1 Big Album (12x36) + Pre-Wedding", "Complimentary Pendrive & 12x18 Frame"] },
@@ -17,20 +18,14 @@ let DB = {
   accounts: JSON.parse(localStorage.getItem("ac_acc") || JSON.stringify(DEF_ADM)),
   enquiries: JSON.parse(localStorage.getItem("ac_enq") || "[]")
 };
-let curAdm = null;
+let curAdm = null, invTimerInt = null;
 
 async function syncFromCloud() {
   try {
     const res = await fetch(DB_URL);
     const data = await res.json();
-    if (data.accounts && data.accounts.length) {
-      DB.accounts = data.accounts;
-      localStorage.setItem("ac_acc", JSON.stringify(DB.accounts));
-    }
-    if (data.enquiries) {
-      DB.enquiries = data.enquiries;
-      localStorage.setItem("ac_enq", JSON.stringify(DB.enquiries));
-    }
+    if (data.accounts?.length) { DB.accounts = data.accounts; localStorage.setItem("ac_acc", JSON.stringify(DB.accounts)); }
+    if (data.enquiries) { DB.enquiries = data.enquiries; localStorage.setItem("ac_enq", JSON.stringify(DB.enquiries)); }
     if (curAdm) renderAdm();
   } catch (e) {}
 }
@@ -38,14 +33,68 @@ async function syncFromCloud() {
 async function pushToCloud() {
   localStorage.setItem("ac_acc", JSON.stringify(DB.accounts));
   localStorage.setItem("ac_enq", JSON.stringify(DB.enquiries));
-  try {
-    await fetch(DB_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(DB)
-    });
-  } catch (e) {}
+  try { await fetch(DB_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(DB) }); } catch (e) {}
+}
+
+function getInviteUrl(q) {
+  const base = location.origin + location.pathname;
+  const p = new URLSearchParams({ inv: "1", h: q.name, d: q.date, v: q.venue || "Madurai", e: q.pkg.split("(")[0].trim() });
+  return `${base}?${p.toString()}`;
+}
+
+function checkInviteMode() {
+  const p = new URLSearchParams(location.search);
+  if (!p.get("inv")) return;
+  document.getElementById("clientView").classList.add("hidden");
+  document.getElementById("bottomNav").classList.add("hidden");
+  document.getElementById("inviteView").classList.remove("hidden");
+  const host = p.get("h") || "Special Celebration", dt = p.get("d") || "", ven = p.get("v") || "Madurai";
+  document.getElementById("invEvent").textContent = p.get("e") || "Celebration";
+  document.getElementById("invHost").textContent = host;
+  document.getElementById("invDate").textContent = "📅 Event Date: " + dt;
+  document.getElementById("invVenue").textContent = "📍 Venue: " + ven;
+  document.getElementById("invMap").href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ven + " Madurai")}`;
+  const target = new Date(dt + "T09:00:00").getTime();
+  const tick = () => {
+    const diff = Math.max(0, target - Date.now());
+    const vals = [Math.floor(diff / 86400000), Math.floor((diff / 3600000) % 24), Math.floor((diff / 60000) % 60), Math.floor((diff / 1000) % 60)];
+    const lbls = ["Days", "Hrs", "Min", "Sec"];
+    document.getElementById("invTimer").innerHTML = vals.map((v, i) => `<div class="p-2 rounded-xl bg-zinc-900 border border-zinc-800"><b class="text-base text-amber-400 block">${v}</b><span class="text-[10px] text-zinc-400">${lbls[i]}</span></div>`).join("");
+  };
+  tick(); invTimerInt = setInterval(tick, 1000);
+}
+
+function closeInvite() {
+  clearInterval(invTimerInt);
+  history.replaceState({}, "", location.pathname);
+  document.getElementById("inviteView").classList.add("hidden");
+  document.getElementById("clientView").classList.remove("hidden");
+  document.getElementById("bottomNav").classList.remove("hidden");
+}
+
+async function trackOrder() {
+  const box = document.getElementById("trkResult");
+  const raw = document.getElementById("trkPhone").value.replace(/\D/g, "").slice(-10);
+  if (raw.length < 10) return box.innerHTML = `<p class="text-xs text-red-400">Please enter a valid 10-digit mobile number.</p>`;
+  box.innerHTML = `<p class="text-xs text-amber-400">Checking live studio status...</p>`;
+  await syncFromCloud();
+  const matches = DB.enquiries.filter(q => String(q.phone).replace(/\D/g, "").endsWith(raw));
+  if (!matches.length) return box.innerHTML = `<p class="text-xs text-zinc-400">No active booking found for this number.</p>`;
+
+  box.innerHTML = matches.map(q => {
+    const stg = q.stage || "Order Confirmed";
+    const sIdx = Math.max(0, STAGES.indexOf(stg));
+    const pct = Math.round(((sIdx + 1) / STAGES.length) * 100);
+    const invLink = getInviteUrl(q);
+    return `
+      <div class="p-3.5 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-2.5 text-xs">
+        <div class="flex justify-between"><b class="text-amber-400">${q.name}</b><span class="text-zinc-400">${q.date}</span></div>
+        <p class="text-white font-semibold">${q.pkg}</p>
+        <div class="w-full h-2 rounded-full bg-black overflow-hidden"><div class="h-full bg-gradient-to-r from-amber-400 to-emerald-400" style="width:${pct}%"></div></div>
+        <div class="space-y-1 pt-1">${STAGES.map((s, i) => `<div class="flex items-center gap-2 ${i <= sIdx ? "text-emerald-400 font-bold" : "text-zinc-500"}"><span>${i <= sIdx ? "●" : "○"}</span><span>${s}</span></div>`).join("")}</div>
+        <a href="${invLink}" class="block text-center py-2 rounded-xl bg-amber-400/15 border border-amber-500/40 text-amber-300 font-bold">💌 Open & Share VIP Digital E-Invite</a>
+      </div>`;
+  }).join("");
 }
 
 function renderPkgs(cat = "all") {
@@ -92,17 +141,11 @@ async function sendEnquiry(e) {
   const gifts = [document.getElementById("chkJute").checked ? "Jute Bag" : "", document.getElementById("chkManja").checked ? "Manja Bag" : ""].filter(Boolean).join(" & ") || "None";
   const ext = Array.from(document.querySelectorAll('input[name="ext"]:checked')).map(c => c.value).join(", ") || "None";
   const q = {
-    id: "ENQ-" + Date.now().toString().slice(-4),
-    name: document.getElementById("cName").value,
-    phone: document.getElementById("cPhone").value,
-    date: document.getElementById("cDate").value,
-    venue: document.getElementById("cVenue").value || "Madurai",
-    pkg: `${p.title} (${p.price})`,
-    gifts: `${gifts} ${document.getElementById("gQty").value}`.trim(),
-    ext,
-    status: "New Enquiry",
-    total: p.num || 0,
-    advance: 0
+    id: "ENQ-" + Date.now().toString().slice(-4), name: document.getElementById("cName").value,
+    phone: document.getElementById("cPhone").value, date: document.getElementById("cDate").value,
+    venue: document.getElementById("cVenue").value || "Madurai", pkg: `${p.title} (${p.price})`,
+    gifts: `${gifts} ${document.getElementById("gQty").value}`.trim(), ext,
+    status: "New Enquiry", total: p.num || 0, advance: 0, stage: "Order Confirmed"
   };
   DB.enquiries.unshift(q);
   await pushToCloud();
@@ -124,7 +167,6 @@ async function doLogin(e) {
   document.getElementById("clientView").classList.add("hidden");
   document.getElementById("bottomNav").classList.add("hidden");
   document.getElementById("adminView").classList.remove("hidden");
-  fetch(`https://formsubmit.co/ajax/${MAIL}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ _subject: `🔔 Login: ${f.name} (${f.role})`, Role: f.role, Time: new Date().toLocaleString() }) }).catch(() => {});
   renderAdm();
 }
 
@@ -135,119 +177,81 @@ function doLogout() {
   document.getElementById("bottomNav").classList.remove("hidden");
 }
 
-async function updStatus(idx, val) {
-  DB.enquiries[idx].status = val;
-  renderAdm();
-  await pushToCloud();
-}
-
-async function updPay(idx, field, val) {
-  if (curAdm.role === "admin") return;
-  DB.enquiries[idx][field] = Number(val) || 0;
+async function updField(idx, field, val) {
+  if (curAdm.role === "admin" && (field === "total" || field === "advance")) return;
+  DB.enquiries[idx][field] = (field === "total" || field === "advance") ? (Number(val) || 0) : val;
   renderAdm();
   await pushToCloud();
 }
 
 async function delEnq(idx) {
-  if (curAdm.role !== "owner") return;
-  if (!confirm("Delete this client enquiry?")) return;
-  DB.enquiries.splice(idx, 1);
-  renderAdm();
-  await pushToCloud();
+  if (curAdm.role !== "owner" || !confirm("Delete this client enquiry?")) return;
+  DB.enquiries.splice(idx, 1); renderAdm(); await pushToCloud();
 }
 
-function replyClient(idx) {
+function replyClient(idx, isInvite = false) {
   const q = DB.enquiries[idx];
   const ph = String(q.phone).replace(/\D/g, "");
   const wa = ph.length === 10 ? "91" + ph : ph;
   const bal = (Number(q.total) || 0) - (Number(q.advance) || 0);
-  const txt = `Vanakkam ${q.name}! Greetings from *Auraa Creations & Events, Madurai*.\n• Event Date: ${q.date}\n• Package: ${q.pkg}\n• Status: ${q.status || "New Enquiry"}\n• Total: ₹${q.total || 0} | Advance: ₹${q.advance || 0} | Balance: ₹${bal}`;
+  const txt = isInvite
+    ? `Vanakkam ${q.name}! Here is your *VIP Digital Invitation & Live Countdown Link* from *Auraa Creations & Events, Madurai* ✨\n\nShare this link with your family & guests:\n${getInviteUrl(q)}`
+    : `Vanakkam ${q.name}! Greetings from *Auraa Creations & Events, Madurai*.\n• Status: ${q.status || "New Enquiry"}\n• Work Progress: ${q.stage || "Order Confirmed"}\n• Total: ₹${q.total || 0} | Advance: ₹${q.advance || 0} | Balance: ₹${bal}`;
   window.open(`https://wa.me/${wa}?text=${encodeURIComponent(txt)}`, "_blank");
 }
 
 function renderAdm() {
   document.getElementById("admName").textContent = curAdm.name;
   document.getElementById("admRole").textContent = curAdm.role.toUpperCase();
-  const isOw = curAdm.role === "owner";
-  const isAdmStaff = curAdm.role === "admin";
-
-  const ownerBox = document.getElementById("ownerBox");
-  ownerBox.classList.toggle("hidden", !isOw);
+  const isOw = curAdm.role === "owner", isAdmStaff = curAdm.role === "admin";
+  document.getElementById("ownerBox").classList.toggle("hidden", !isOw);
   if (isOw && !document.getElementById("mRole")) {
     const sel = document.createElement("select");
     sel.id = "mRole";
     sel.className = "w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-white";
-    sel.innerHTML = `<option value="manager">Role: Manager (Can update Status, Total & Advance)</option><option value="admin">Role: Admin / Staff (Restricted — Status & WhatsApp only)</option>`;
+    sel.innerHTML = `<option value="manager">Role: Manager (Status, Progress & Payments)</option><option value="admin">Role: Admin / Staff (Restricted — Status & Progress only)</option>`;
     document.getElementById("mPass").insertAdjacentElement("afterend", sel);
   }
-
   document.getElementById("accList").innerHTML = DB.accounts.map(a => `
     <div class="p-3 rounded-xl bg-zinc-900 flex justify-between items-center text-xs">
       <div><b>${a.name}</b> <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px] uppercase">${a.role}</span><br><span class="text-zinc-400">ID: ${a.user} • Pass: ${a.pass}</span></div>
-      <div class="flex gap-1.5">
-        <button onclick="chgPass('${a.id}')" class="px-2.5 py-1 rounded bg-amber-400 text-black font-bold">Change Pass</button>
-        ${a.role !== "owner" ? `<button onclick="delAcc('${a.id}')" class="px-2 py-1 rounded bg-red-900 text-white">Del</button>` : ""}
-      </div>
+      <div class="flex gap-1.5"><button onclick="chgPass('${a.id}')" class="px-2.5 py-1 rounded bg-amber-400 text-black font-bold">Pass</button>${a.role !== "owner" ? `<button onclick="delAcc('${a.id}')" class="px-2 py-1 rounded bg-red-900 text-white">Del</button>` : ""}</div>
     </div>`).join("");
 
   const enqs = DB.enquiries;
   const totSum = enqs.reduce((s, q) => s + (Number(q.total) || 0), 0);
   const advSum = enqs.reduce((s, q) => s + (Number(q.advance) || 0), 0);
+  const topBar = `<div class="flex justify-between items-center mb-2"><span class="text-[11px] text-emerald-400">☁️ 5TB Drive Synced</span><button type="button" onclick="syncFromCloud()" class="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-700 text-[11px] text-amber-400 font-bold">🔄 Refresh</button></div>`;
+  const sumHtml = !isAdmStaff && enqs.length ? `<div class="grid grid-cols-3 gap-2 p-3 rounded-2xl bg-zinc-900 border border-amber-500/30 text-center text-xs mb-3"><div><span class="text-[10px] text-zinc-400 block">TOTAL</span><b class="text-white">₹${totSum}</b></div><div><span class="text-[10px] text-zinc-400 block">ADVANCE</span><b class="text-emerald-400">₹${advSum}</b></div><div><span class="text-[10px] text-zinc-400 block">BALANCE</span><b class="text-amber-400">₹${totSum - advSum}</b></div></div>` : "";
 
-  const syncBar = `<div class="flex justify-between items-center mb-2"><span class="text-[11px] text-emerald-400">☁️ Synced with 5TB Google Drive</span><button type="button" onclick="syncFromCloud()" class="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-700 text-[11px] text-amber-400 font-bold">🔄 Refresh</button></div>`;
-
-  const summaryHtml = !isAdmStaff && enqs.length ? `
-    <div class="grid grid-cols-3 gap-2 p-3 rounded-2xl bg-zinc-900 border border-amber-500/30 text-center text-xs mb-3">
-      <div><span class="text-[10px] text-zinc-400 block">TOTAL</span><b class="text-white">₹${totSum}</b></div>
-      <div><span class="text-[10px] text-zinc-400 block">ADVANCE</span><b class="text-emerald-400">₹${advSum}</b></div>
-      <div><span class="text-[10px] text-zinc-400 block">BALANCE</span><b class="text-amber-400">₹${totSum - advSum}</b></div>
-    </div>` : "";
-
-  document.getElementById("enqList").innerHTML = syncBar + summaryHtml + (enqs.length ? enqs.map((q, i) => {
-    const st = q.status || "New Enquiry";
-    const tot = Number(q.total) || 0;
-    const adv = Number(q.advance) || 0;
-    const bal = tot - adv;
-    const stColor = st === "Confirmed" ? "text-emerald-400 border-emerald-700" : st === "Completed" ? "text-sky-400 border-sky-700" : st === "Cancelled" ? "text-red-400 border-red-700" : "text-amber-400 border-amber-700";
-
+  document.getElementById("enqList").innerHTML = topBar + sumHtml + (enqs.length ? enqs.map((q, i) => {
+    const st = q.status || "New Enquiry", stg = q.stage || "Order Confirmed", tot = Number(q.total) || 0, adv = Number(q.advance) || 0;
     return `
       <div class="p-3.5 rounded-2xl bg-[#121216] border border-zinc-800 text-xs space-y-2.5">
         <div class="flex justify-between items-start gap-2">
           <div><b class="text-amber-400 text-sm">${q.name}</b> <span class="text-zinc-400">(${q.phone})</span><p class="text-[11px] text-zinc-400">📅 ${q.date} • 📍 ${q.venue || "Madurai"}</p></div>
-          <select onchange="updStatus(${i}, this.value)" class="px-2 py-1 rounded-lg bg-zinc-900 border ${stColor} text-[11px] font-bold">
-            <option ${st === "New Enquiry" ? "selected" : ""}>New Enquiry</option>
-            <option ${st === "Confirmed" ? "selected" : ""}>Confirmed</option>
-            <option ${st === "Completed" ? "selected" : ""}>Completed</option>
-            <option ${st === "Cancelled" ? "selected" : ""}>Cancelled</option>
+          <select onchange="updField(${i}, 'status', this.value)" class="px-2 py-1 rounded-lg bg-zinc-900 border border-amber-600 text-[11px] font-bold text-amber-300">
+            ${["New Enquiry", "Confirmed", "Completed", "Cancelled"].map(o => `<option ${st === o ? "selected" : ""}>${o}</option>`).join("")}
           </select>
         </div>
-
         <p class="text-white font-semibold">${q.pkg}</p>
-        <p class="text-emerald-300 text-[11px]">Gifts: ${q.gifts} | Add-ons: ${q.ext}</p>
-
-        ${isAdmStaff ? `
-          <div class="p-2 rounded-xl bg-zinc-900/80 text-[11px] text-zinc-400">🔒 Payment & Balance editing restricted to Owner / Manager</div>
-        ` : `
-          <div class="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-zinc-900 border border-zinc-800">
-            <div>
-              <label class="text-[10px] text-zinc-400 block">Total (₹)</label>
-              <input type="number" value="${tot}" onchange="updPay(${i}, 'total', this.value)" class="w-full mt-0.5 px-2 py-1 rounded bg-black border border-zinc-700 text-white font-bold" />
-            </div>
-            <div>
-              <label class="text-[10px] text-zinc-400 block">Advance (₹)</label>
-              <input type="number" value="${adv}" onchange="updPay(${i}, 'advance', this.value)" class="w-full mt-0.5 px-2 py-1 rounded bg-black border border-zinc-700 text-emerald-400 font-bold" />
-            </div>
-            <div>
-              <label class="text-[10px] text-zinc-400 block">Balance (₹)</label>
-              <div class="mt-0.5 px-2 py-1 rounded bg-black/60 border border-zinc-800 text-amber-400 font-extrabold">₹${bal}</div>
-            </div>
-          </div>
-        `}
-
-        <div class="flex gap-2 pt-1">
-          <button type="button" onclick="replyClient(${i})" class="flex-1 py-2 rounded-xl bg-emerald-950/60 border border-emerald-700/60 text-emerald-300 font-bold">💬 Send Status & Bill on WhatsApp</button>
-          ${isOw ? `<button type="button" onclick="delEnq(${i})" class="px-3 py-2 rounded-xl bg-red-950/60 border border-red-800/60 text-red-300 font-bold">Delete</button>` : ""}
+        <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-zinc-900/90 border border-zinc-800">
+          <span class="text-[11px] text-zinc-400">🚀 Work Stage:</span>
+          <select onchange="updField(${i}, 'stage', this.value)" class="px-2 py-1 rounded bg-black border border-zinc-700 text-[11px] text-emerald-400 font-bold">
+            ${STAGES.map(s => `<option ${stg === s ? "selected" : ""}>${s}</option>`).join("")}
+          </select>
         </div>
+        ${isAdmStaff ? `<div class="p-2 rounded-xl bg-zinc-900/80 text-[11px] text-zinc-400">🔒 Payment editing restricted to Owner / Manager</div>` : `
+          <div class="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-zinc-900 border border-zinc-800">
+            <div><label class="text-[10px] text-zinc-400 block">Total (₹)</label><input type="number" value="${tot}" onchange="updField(${i}, 'total', this.value)" class="w-full mt-0.5 px-2 py-1 rounded bg-black border border-zinc-700 text-white font-bold" /></div>
+            <div><label class="text-[10px] text-zinc-400 block">Advance (₹)</label><input type="number" value="${adv}" onchange="updField(${i}, 'advance', this.value)" class="w-full mt-0.5 px-2 py-1 rounded bg-black border border-zinc-700 text-emerald-400 font-bold" /></div>
+            <div><label class="text-[10px] text-zinc-400 block">Balance (₹)</label><div class="mt-0.5 px-2 py-1 rounded bg-black/60 border border-zinc-800 text-amber-400 font-extrabold">₹${tot - adv}</div></div>
+          </div>`}
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button type="button" onclick="replyClient(${i}, false)" class="py-2 rounded-xl bg-emerald-950/60 border border-emerald-700/60 text-emerald-300 font-bold">💬 Send Status & Bill</button>
+          <button type="button" onclick="replyClient(${i}, true)" class="py-2 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 font-bold">💌 Share VIP E-Invite</button>
+        </div>
+        ${isOw ? `<button type="button" onclick="delEnq(${i})" class="w-full py-1.5 rounded-xl bg-red-950/50 border border-red-900 text-red-300 font-bold">Delete Enquiry</button>` : ""}
       </div>`;
   }).join("") : `<p class="text-xs text-zinc-500">No enquiries yet.</p>`);
 }
@@ -256,22 +260,9 @@ async function addMgr(e) {
   e.preventDefault();
   const roleSel = document.getElementById("mRole") ? document.getElementById("mRole").value : "manager";
   DB.accounts.push({ id: Date.now() + "", name: document.getElementById("mName").value, user: document.getElementById("mUser").value.trim().toLowerCase(), pass: document.getElementById("mPass").value, role: roleSel });
-  e.target.reset(); renderAdm();
-  await pushToCloud();
+  e.target.reset(); renderAdm(); await pushToCloud();
 }
+async function chgPass(id) { const np = prompt("Enter New Password:"); if (np) { DB.accounts = DB.accounts.map(a => a.id === id ? { ...a, pass: np } : a); renderAdm(); await pushToCloud(); } }
+async function delAcc(id) { DB.accounts = DB.accounts.filter(a => a.id !== id); renderAdm(); await pushToCloud(); }
 
-async function chgPass(id) {
-  const np = prompt("Enter New Password:");
-  if (!np) return;
-  DB.accounts = DB.accounts.map(a => a.id === id ? { ...a, pass: np } : a);
-  renderAdm();
-  await pushToCloud();
-}
-
-async function delAcc(id) {
-  DB.accounts = DB.accounts.filter(a => a.id !== id);
-  renderAdm();
-  await pushToCloud();
-}
-
-renderPkgs("all"); updatePreview(); syncFromCloud();
+checkInviteMode(); renderPkgs("all"); updatePreview(); syncFromCloud();
