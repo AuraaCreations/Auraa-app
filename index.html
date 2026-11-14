@@ -23,7 +23,7 @@
       <summary class="px-3.5 py-1.5 rounded-full bg-zinc-900 border border-amber-500/50 text-xs font-bold text-amber-400 cursor-pointer">🔒 Admin</summary>
       <div class="fixed inset-x-4 top-16 z-50 rounded-3xl bg-[#121216] border border-zinc-700 p-5 shadow-2xl space-y-3">
         <div class="flex items-center justify-between">
-          <div><span class="text-[10px] font-bold uppercase text-amber-400">Owner & Manager Access</span><h3 class="text-base font-extrabold text-white">Studio Login</h3></div>
+          <div><span class="text-[10px] font-bold uppercase text-amber-400">Studio Staff Access</span><h3 class="text-base font-extrabold text-white">Studio Login</h3></div>
           <button type="button" onclick="document.getElementById('adminMenu').removeAttribute('open')" class="w-8 h-8 rounded-full bg-zinc-900 text-zinc-400">✕</button>
         </div>
         <form onsubmit="doLogin(event)" class="space-y-3">
@@ -35,6 +35,21 @@
     </details>
   </header>
 
+  <main id="inviteView" class="hidden px-4 pt-6 space-y-5">
+    <div class="rounded-3xl bg-gradient-to-b from-amber-500/15 via-[#121216] to-zinc-950 border border-amber-500/40 p-6 text-center shadow-2xl space-y-4">
+      <span class="px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-bold tracking-widest uppercase">✨ VIP Digital Invitation</span>
+      <p id="invEvent" class="text-xs font-bold uppercase tracking-widest text-zinc-400">Grand Celebration</p>
+      <h2 id="invHost" class="text-2xl font-extrabold text-amber-400">Auraa Special Event</h2>
+      <div class="p-3.5 rounded-2xl bg-black/50 border border-zinc-800 space-y-1 text-xs">
+        <p id="invDate" class="font-bold text-white">📅 Date</p>
+        <p id="invVenue" class="text-zinc-300">📍 Madurai</p>
+      </div>
+      <div id="invTimer" class="grid grid-cols-4 gap-2 text-center"></div>
+      <a id="invMap" target="_blank" class="block w-full py-3 rounded-xl bg-amber-400 text-black font-extrabold text-xs">📍 Open Venue in Google Maps</a>
+      <button type="button" onclick="closeInvite()" class="text-[11px] text-zinc-400 underline">Explore Auraa Creations & Events →</button>
+    </div>
+  </main>
+
   <main id="clientView" class="px-4 pt-4 space-y-6">
     <section class="rounded-3xl bg-gradient-to-br from-zinc-900 via-[#121216] to-zinc-950 border border-zinc-800 p-5 shadow-xl">
       <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] mb-3">📍 Southgate, Madurai - 625001</div>
@@ -45,6 +60,15 @@
         <a href="https://wa.me/917449288649?text=Hi%20Auraa%20Creations%20%26%20Events%2C%20I%20want%20package%20details." target="_blank" class="flex flex-col items-center py-3 rounded-2xl bg-emerald-950/40 border border-emerald-800/50 gap-1"><span class="text-base">💬</span><span class="text-[11px] font-semibold text-emerald-300">WhatsApp</span></a>
         <a href="https://www.instagram.com/auraa_creation_by_aishu?xtok=MWZtM3JydTB1dDA2OQ==" target="_blank" class="flex flex-col items-center py-3 rounded-2xl bg-pink-950/30 border border-pink-800/40 gap-1"><span class="text-base">📸</span><span class="text-[11px] font-semibold text-pink-300">Instagram</span></a>
       </div>
+    </section>
+
+    <section id="trackerSection" class="rounded-3xl bg-[#121216] border border-amber-500/30 p-4 space-y-3">
+      <div><span class="text-[10px] font-bold uppercase tracking-widest text-amber-400">Live Client Portal</span><h3 class="text-base font-extrabold text-white">Track Order Status & VIP E-Invite</h3></div>
+      <div class="flex gap-2">
+        <input id="trkPhone" type="tel" placeholder="Enter Registered Mobile Number" class="flex-1 px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-white" />
+        <button type="button" onclick="trackOrder()" class="px-4 py-2.5 rounded-xl bg-amber-400 text-black font-extrabold text-xs">Track</button>
+      </div>
+      <div id="trkResult" class="space-y-3"></div>
     </section>
 
     <section>
@@ -62,11 +86,11 @@
     <section id="bookingSection" class="rounded-3xl bg-[#121216] border border-zinc-800 p-5 space-y-4">
       <div><span class="text-[10px] font-bold uppercase tracking-widest text-amber-400">Instant Enquiry & Quote</span><h3 class="text-lg font-extrabold text-white">Book Event / Enquire Details</h3></div>
       <form onsubmit="sendEnquiry(event)" class="space-y-3">
-        <input id="cName" required placeholder="Your Name *" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white" />
+        <input id="cName" required placeholder="Your Name / Couple Name *" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white" />
         <input id="cPhone" required type="tel" placeholder="WhatsApp Number *" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white" />
         <div class="grid grid-cols-2 gap-2.5">
           <input id="cDate" required type="date" class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-white" />
-          <input id="cVenue" placeholder="Venue / Madurai" class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-white" />
+          <input id="cVenue" placeholder="Venue / Mahal (Madurai)" class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-white" />
         </div>
         <select id="custPackage" onchange="updatePreview()" class="w-full px-3.5 py-3 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-white">
           <option value="wed-45">Silver Wedding — ₹45,000 (Trad Photo+Video, 12x36 Album, Pre-Wed, Frame)</option>
@@ -108,24 +132,25 @@
       <button onclick="doLogout()" class="px-3 py-1.5 rounded-xl bg-red-950 text-red-300 text-xs font-bold">Logout</button>
     </div>
     <div id="ownerBox" class="p-4 rounded-2xl bg-[#121216] border border-zinc-800 space-y-3">
-      <h3 class="text-sm font-extrabold text-amber-400">+ Add Manager / Change Passwords</h3>
+      <h3 class="text-sm font-extrabold text-amber-400">+ Add Manager / Admin & Passwords</h3>
       <form onsubmit="addMgr(event)" class="space-y-2">
-        <input id="mName" required placeholder="Manager Name" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs" />
-        <input id="mUser" required placeholder="Manager Username" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs" />
-        <input id="mPass" required placeholder="Set Manager Password" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs" />
-        <button class="w-full py-2.5 rounded-xl bg-amber-400 text-black font-bold text-xs">Create Manager Account</button>
+        <input id="mName" required placeholder="Staff Name" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs" />
+        <input id="mUser" required placeholder="Login Username" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs" />
+        <input id="mPass" required placeholder="Set Password" class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs" />
+        <button class="w-full py-2.5 rounded-xl bg-amber-400 text-black font-bold text-xs">Create Account</button>
       </form>
       <div id="accList" class="space-y-2 pt-2"></div>
     </div>
-    <div class="space-y-2"><h3 class="text-xs font-bold uppercase text-zinc-400">Client Enquiries</h3><div id="enqList" class="space-y-2"></div></div>
+    <div class="space-y-2"><h3 class="text-xs font-bold uppercase text-zinc-400">Client Enquiries & Live Work Stages</h3><div id="enqList" class="space-y-2"></div></div>
   </main>
 
   <nav id="bottomNav" class="fixed bottom-0 inset-x-0 z-30 bg-[#09090b]/95 border-t border-zinc-800 px-6 py-2.5 flex justify-around">
     <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="flex flex-col items-center text-amber-400"><span class="text-base">✨</span><span class="text-[10px] font-bold">Studio</span></button>
+    <button onclick="document.getElementById('trackerSection').scrollIntoView({behavior:'smooth'})" class="flex flex-col items-center text-zinc-400"><span class="text-base">🚀</span><span class="text-[10px] font-semibold">Track</span></button>
     <button onclick="document.getElementById('categoryTabs').scrollIntoView({behavior:'smooth'})" class="flex flex-col items-center text-zinc-400"><span class="text-base">📦</span><span class="text-[10px] font-semibold">Packages</span></button>
     <button onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})" class="flex flex-col items-center text-zinc-400"><span class="text-base">📅</span><span class="text-[10px] font-semibold">Enquire</span></button>
   </nav>
 
   <script src="./app.js"></script>
 </body>
-    </html>
+</html>
